@@ -113,3 +113,191 @@ def check_admin(decoded_token: dict):
     if "admin" not in roles:
         raise HTTPException(status_code=403, detail="Admin role required")
 
+
+class TaskInput(BaseModel):
+    title: str
+    date: str
+    employees: List[str]
+
+class TaskStatusUpdate(BaseModel):
+    task_id: int
+    completed: bool
+
+class TaskDeleteInput(BaseModel):
+    task_id: int
+
+@app.post("/api/task/assign")
+async def create_task_by_admin(
+    task: TaskInput, 
+    token: dict = Depends(verify_token)
+):
+    check_admin(token)
+    
+    if not task.title or not task.employees:
+        raise HTTPException(status_code=400, detail="Title and employees are required")
+
+    conn = await get_db()
+    try:
+        task_record = await conn.fetchrow(
+            """INSERT INTO tasks (username, title, date, employees) 
+               VALUES ($1, $2, $3, $4) RETURNING *""",
+            token["preferred_username"], 
+            task.title,
+            task.date,
+            task.employees
+        )
+        
+        for employee in task.employees:
+            await conn.execute(
+                """INSERT INTO task_status (task_id, username, completed)
+                   VALUES ($1, $2, $3)""",
+                task_record["id"],
+                employee,
+                False
+            )
+        
+        return {"message": "Task created successfully", "task": dict(task_record)}
+    except Exception as e:
+        logger.error(f"Error creating task: {str(e)}")
+        logger.error(f"Task data: {task.dict()}")
+        logger.error(f"Database connection: {conn}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/task")
+async def delete_task_by_admin(
+    task: TaskDeleteInput, 
+    token: dict = Depends(verify_token)
+):
+    check_admin(token)
+    
+    conn = await get_db()
+    try:
+        existing_task = await conn.fetchrow(
+            "SELECT * FROM tasks WHERE id = $1 AND username = $2",
+            task.task_id,
+            token["preferred_username"]
+        )
+        
+        if not existing_task:
+            raise HTTPException(status_code=404, detail="Task not found or not authorized")
+
+        await conn.execute("DELETE FROM tasks WHERE id = $1", task.task_id)
+        
+        return {"message": "Task deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await conn.close()
+
+@app.get("/api/admin/tasks")
+async def get_all_tasks_with_status(
+    token: dict = Depends(verify_token)
+):
+    check_admin(token)
+    
+    conn = await get_db()
+    try:
+        tasks = await conn.fetch(
+            "SELECT * FROM tasks WHERE username = $1",
+            token["preferred_username"]
+        )
+        
+        result = []
+        for task in tasks:
+            statuses = await conn.fetch(
+                "SELECT * FROM task_status WHERE task_id = $1",
+                task["id"]
+            )
+            result.append({
+                "task": dict(task),
+                "statuses": [dict(s) for s in statuses]
+            })
+        
+        return {"tasks": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await conn.close()
+
+@app.put("/api/task")
+async def update_task_status(
+    update: TaskStatusUpdate,
+    token: dict = Depends(verify_token)
+):
+    conn = await get_db()
+    try:
+        assigned = await conn.fetchrow(
+            """SELECT 1 FROM tasks t 
+               WHERE t.id = $1 AND $2 = ANY(t.employees)""",
+            update.task_id,
+            token["preferred_username"]
+        )
+        
+        if not assigned:
+            raise HTTPException(status_code=403, detail="Not authorized to update this task")
+
+        await conn.execute(
+            """UPDATE task_status 
+               SET completed = $1 
+               WHERE task_id = $2 AND username = $3""",
+            update.completed,
+            update.task_id,
+            token["preferred_username"]
+        )
+        
+        return {"message": "Task status updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await conn.close()
+
+
+@app.get("/api/task")
+async def get_user_tasks(token: dict = Depends(verify_token)):
+    conn = await get_db()
+    try:
+        tasks = await conn.fetch("""
+            SELECT 
+                t.id,
+                t.title,
+                t.date,
+                t.username,
+                ts.completed
+            FROM tasks t
+            JOIN task_status ts ON t.id = ts.task_id
+            WHERE ts.username = $1
+            ORDER BY t.date DESC
+        """, token["preferred_username"])
+
+        return {
+            "tasks": [
+                {
+                    "id": task["id"],
+                    "title": task["title"],
+                    "date": task["date"],
+                    "admin": task["username"],
+                    "completed": task["completed"]
+                }
+                for task in tasks
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Error fetching tasks: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        await conn.close()
+
+@app.get("/api/employees")
+async def get_employees(token: dict = Depends(verify_token)):
+    check_admin(token)
+    conn = await get_db()
+
+    query = """
+        SELECT username AS email
+        FROM user_entity
+        WHERE email IS NOT NULL
+    """
+    employees = await conn.fetch(query)
+    await conn.close()
+
+    return {"employees": [dict(e) for e in employees]}
