@@ -33,7 +33,8 @@ const ToDoItems = () => {
 
   const fetchTasks = async (authToken) => {
     try {
-      const assignedResponse = await fetch("http://localhost:3001/api/task", {
+      // const assignedResponse = await fetch("http://localhost:3001/api/task", {
+        const assignedResponse = await fetch("/api/task", {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -47,7 +48,8 @@ const ToDoItems = () => {
       setAssignedTasks(assignedData.tasks || []);
 
       if (isAdmin) {
-        const createdResponse = await fetch("http://localhost:3001/api/admin/tasks", {
+        // const createdResponse = await fetch("http://localhost:3001/api/admin/tasks", {
+          const createdResponse = await fetch("/api/admin/tasks", {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
@@ -65,11 +67,32 @@ const ToDoItems = () => {
     }
   };
 
+  const handleAddTask = async (taskText, taskDate) => {
+    try {
+      // const response = await fetch("http://localhost:3001/api/task", {
+        const response = await fetch("/api/task", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title: taskText, date: taskDate }),
+      });
 
+      if (response.ok) {
+        fetchTasks(token);
+      } else {
+        console.error("Error adding task:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
+  };
 
   const handleDeleteTask = async (taskId) => {
     try {
-      const response = await fetch("http://localhost:3001/api/task", {
+      // const response = await fetch("http://localhost:3001/api/task", {
+        const response = await fetch("/api/task", {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -90,13 +113,14 @@ const ToDoItems = () => {
 
   const handleCompleteTask = async (taskId, completed) => {
     try {
-      const response = await fetch("http://localhost:3001/api/task", {
+      // const response = await fetch("http://localhost:3001/api/task", {
+        const response = await fetch("/api/task", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ task_id: taskId, completed }), 
+        body: JSON.stringify({ task_id: taskId, completed }),  // Użyj parametru
       });
   
       if (response.ok) {
@@ -136,33 +160,34 @@ const ToDoItems = () => {
           <h2>Tasks You Created</h2>
           <ul>
             {createdTasks.map((entry, i) => (
-          <li key={`created-${i}`}>
-              <div>
-                <strong>{entry.task.title}</strong> (Due: {entry.task.date})
-                <ul>
-                  {entry.statuses.length > 0 ? (
-                    entry.statuses.map((s, j) => (
-                      <li key={j}>
-                        {s.username}:{" "}
-                        <span className={s.completed ? "status-done" : "status-not-done"}>
-                          {s.completed ? "✔️ Done" : "❌ Not done"}
-                        </span>
-                      </li>
-                    ))
-                  ) : (
-                    <li>No assigned users</li>
-                  )}
-                </ul>
-              </div>
-              <button
-                className="delete"
-                onClick={() => handleDeleteTask(entry.task.id)}
-                style={{ marginLeft: "1rem" }}
-              >
-                🗑️ Delete
-              </button>
-          </li>
-        ))}
+  <li key={`created-${i}`}>
+      <div>
+        <strong>{entry.task.title}</strong> (Due: {entry.task.date})
+        <ul>
+          {entry.statuses.length > 0 ? (
+            entry.statuses.map((s, j) => (
+              <li key={j}>
+                {s.username}:{" "}
+                <span className={s.completed ? "status-done" : "status-not-done"}>
+                  {s.completed ? "✔️ Done" : "❌ Not done"}
+                </span>
+              </li>
+            ))
+          ) : (
+            <li>No assigned users</li>
+          )}
+        </ul>
+      </div>
+      <button
+        className="delete"
+        onClick={() => handleDeleteTask(entry.task.id)}
+        style={{ marginLeft: "1rem" }}
+      >
+        🗑️ Delete
+      </button>
+  </li>
+))}
+
           </ul>
         </>
       )}

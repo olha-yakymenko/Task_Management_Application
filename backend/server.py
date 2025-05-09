@@ -9,11 +9,12 @@ from pydantic import BaseModel
 import logging
 
 
-load_dotenv()
+
+load_dotenv("/config/backend-config.env")
 
 app = FastAPI()
 
-origins = ["http://localhost:3000"]
+origins = ["http://localhost:3000", "http://localhost"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -23,18 +24,46 @@ app.add_middleware(
 )
 
 async def get_db():
-    return await asyncpg.connect(
-        user=os.getenv("PGUSER"),
-        password=os.getenv("PGPASSWORD"),
-        database=os.getenv("PGDATABASE"),
-        host=os.getenv("PGHOST"),
-        port=os.getenv("PGPORT")
+    pg_user = os.getenv("PGUSER")
+    pg_password_file = os.getenv("PGPASSWORD_FILE")
+    pg_database = os.getenv("PGDATABASE")
+    pg_host = os.getenv("PGHOST")
+    pg_port = os.getenv("PGPORT")
+
+    if pg_password_file:
+        try:
+            with open(pg_password_file, "r") as f:
+                pg_password = f.read().strip()
+        except Exception as e:
+            print(f"Błąd podczas odczytu pliku z hasłem: {e}")
+            raise Exception("Błąd odczytu hasła z pliku!")
+    else:
+        pg_password = os.getenv("PGPASSWORD")  
+
+    if pg_user is None or pg_password is None or pg_database is None:
+        print("Błąd: Zmienne środowiskowe nie zostały załadowane!")
+        raise Exception("Brak wymaganych zmiennych środowiskowych!")  
+    else:
+        print(f"Zmienna PGUSER: {pg_user}")
+        print(f"Zmienna PGPASSWORD: {pg_password}")
+        print(f"Zmienna PGDATABASE: {pg_database}")
+
+    conn = await asyncpg.connect(
+        user=pg_user,
+        password=pg_password,
+        database=pg_database,
+        host=pg_host,
+        port=pg_port
     )
+
+    return conn
+
 
 @app.on_event("startup")
 async def startup():
     conn = await get_db()
     await conn.execute("""
+
         CREATE TABLE IF NOT EXISTS tasks (
             id SERIAL PRIMARY KEY,
             username VARCHAR(255) NOT NULL,
@@ -108,12 +137,14 @@ def verify_token(authorization: Optional[str] = Header(None)) -> dict:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
+# Admin check
 def check_admin(decoded_token: dict):
     roles = decoded_token.get("realm_access", {}).get("roles", [])
     if "admin" not in roles:
         raise HTTPException(status_code=403, detail="Admin role required")
 
 
+# Models
 class TaskInput(BaseModel):
     title: str
     date: str
@@ -126,11 +157,13 @@ class TaskStatusUpdate(BaseModel):
 class TaskDeleteInput(BaseModel):
     task_id: int
 
+# Endpointy dla zadań
 @app.post("/api/task/assign")
 async def create_task_by_admin(
     task: TaskInput, 
     token: dict = Depends(verify_token)
 ):
+    """Tylko admin może tworzyć zadania dla wielu użytkowników"""
     check_admin(token)
     
     if not task.title or not task.employees:
@@ -141,7 +174,7 @@ async def create_task_by_admin(
         task_record = await conn.fetchrow(
             """INSERT INTO tasks (username, title, date, employees) 
                VALUES ($1, $2, $3, $4) RETURNING *""",
-            token["preferred_username"], 
+            token["preferred_username"],  
             task.title,
             task.date,
             task.employees
@@ -168,10 +201,12 @@ async def delete_task_by_admin(
     task: TaskDeleteInput, 
     token: dict = Depends(verify_token)
 ):
+    """Tylko admin może usuwać zadania"""
     check_admin(token)
     
     conn = await get_db()
     try:
+        # Sprawdź czy zadanie istnieje i należy do admina
         existing_task = await conn.fetchrow(
             "SELECT * FROM tasks WHERE id = $1 AND username = $2",
             task.task_id,
@@ -193,6 +228,7 @@ async def delete_task_by_admin(
 async def get_all_tasks_with_status(
     token: dict = Depends(verify_token)
 ):
+    """Pobierz wszystkie zadania z statusami wykonania (tylko admin)"""
     check_admin(token)
     
     conn = await get_db()
@@ -224,6 +260,7 @@ async def update_task_status(
     update: TaskStatusUpdate,
     token: dict = Depends(verify_token)
 ):
+    """Użytkownik może zaktualizować swój status zadania"""
     conn = await get_db()
     try:
         assigned = await conn.fetchrow(
@@ -251,6 +288,26 @@ async def update_task_status(
     finally:
         await conn.close()
 
+@app.get("/api/my-tasks")
+async def get_my_tasks(
+    token: dict = Depends(verify_token)
+):
+    """Pobierz zadania przypisane do bieżącego użytkownika"""
+    conn = await get_db()
+    try:
+        tasks = await conn.fetch(
+            """SELECT t.*, ts.completed 
+               FROM tasks t
+               JOIN task_status ts ON t.id = ts.task_id
+               WHERE ts.username = $1""",
+            token["preferred_username"]
+        )
+        
+        return {"tasks": [dict(t) for t in tasks]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await conn.close()
 
 @app.get("/api/task")
 async def get_user_tasks(token: dict = Depends(verify_token)):
@@ -301,3 +358,8 @@ async def get_employees(token: dict = Depends(verify_token)):
     await conn.close()
 
     return {"employees": [dict(e) for e in employees]}
+
+
+@app.get("/health")
+def health():
+    return {"status": "OK"}

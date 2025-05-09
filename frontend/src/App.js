@@ -4,7 +4,6 @@ import keycloak from "./Keycloak";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Nav from "./components/Nav";
 import WelcomePage from "./pages/Homepage";
-import SecuredPage from "./pages/UserPanel";
 import AdminPanel from "./pages/AdminPanel";
 import PrivateRoute from "./helpers/PrivateRoute";
 import AdminRoute from "./helpers/AdminRoute";

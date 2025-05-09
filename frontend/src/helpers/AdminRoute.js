@@ -12,7 +12,6 @@ const AdminRoute = ({ children }) => {
     console.log('[AdminRoute] Has admin role:', keycloak.hasResourceRole('admin'));
   }
 
-  // const isLoggedIn = keycloak.authenticated && keycloak.hasResourceRole('admin');
   const isLoggedIn = keycloak.authenticated && keycloak.realmAccess?.roles.includes('admin');
 
   return isLoggedIn ? children : null;

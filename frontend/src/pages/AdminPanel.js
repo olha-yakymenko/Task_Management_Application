@@ -17,7 +17,8 @@ const TaskCreationForm = () => {
   useEffect(() => {
     if (keycloak.authenticated) {
       axios
-        .get("http://localhost:3001/api/employees", {
+        // .get("http://localhost:3001/api/employees", {
+        .get(" /api/employees", {
           headers: {
             Authorization: `Bearer ${keycloak.token}`,
           },
@@ -37,7 +38,8 @@ const TaskCreationForm = () => {
 
     try {
       const result = await axios.post(
-        "http://localhost:3001/api/task/assign",
+        // "http://localhost:3001/api/task/assign",
+        "api/task/assign",
         {
           title,
           date,
