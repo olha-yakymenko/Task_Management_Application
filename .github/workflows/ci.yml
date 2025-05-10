@@ -28,7 +28,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile.frontend
+          file: ./docker-part/frontend/Dockerfile.frontend
           push: true
           platforms: linux/amd64,linux/arm64
           tags: olhaya/frontend:multiarch
@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend
-          file: ./backend/Dockerfile.backend
+          file: ./docker-part/backend/Dockerfile.backend
           push: true
           platforms: linux/amd64,linux/arm64
           tags: olhaya/backend:multiarch
@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./keycloak
-          file: ./keycloak/Dockerfile.keycloak
+          file: ./docker-part/keycloak/Dockerfile.keycloak
           push: true
           platforms: linux/amd64,linux/arm64
           tags: olhaya/keycloak:multiarch

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: ./kompose convert -o ../kubernetes-part
+    kompose.cmd: ./kompose convert -o kuber2
     kompose.version: 1.31.2 (a92241f79)
   creationTimestamp: null
   labels:
@@ -18,19 +18,23 @@ spec:
   template:
     metadata:
       annotations:
-        kompose.cmd: ./kompose convert -o ../kubernetes-part
+        kompose.cmd: ./kompose convert -o kuber2
         kompose.version: 1.31.2 (a92241f79)
       creationTimestamp: null
       labels:
-        io.kompose.network/docker-part-db-network: "true"
+        io.kompose.network/services-db-network: "true"
         io.kompose.service: postgres
     spec:
       containers:
         - env:
             - name: POSTGRES_DB
               value: tasks
-            - name: POSTGRES_PASSWORD_FILE
-              value: /run/secrets/pg-password
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-password
+                  key: pg-password
+
             - name: POSTGRES_USER
               value: admin
           image: postgres:16-alpine
@@ -47,6 +51,10 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
           name: postgres
+          ports:
+            - containerPort: 5432
+              hostPort: 5432
+              protocol: TCP
           resources: {}
           volumeMounts:
             - mountPath: /run/secrets/pg-password

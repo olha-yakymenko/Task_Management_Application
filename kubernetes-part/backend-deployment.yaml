@@ -9,7 +9,7 @@ metadata:
     io.kompose.service: backend
   name: backend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       io.kompose.service: backend
@@ -28,9 +28,9 @@ spec:
       containers:
         - env:
             - name: PGPASSWORD_FILE
-              value: /run/secrets/pg-password
+              value: /run/secrets/pg-password/pg-password
             - name: PUBLIC_KEY_FILE
-              value: /run/secrets/jwt-private-key
+              value: /run/secrets/jwt-private-key/jwt-private-key
           image: olhaya/backend:multiarch
           livenessProbe:
             exec:
