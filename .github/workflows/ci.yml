@@ -27,7 +27,7 @@ jobs:
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: ./docker-part/frontend
           file: ./docker-part/frontend/Dockerfile.frontend
           push: true
           platforms: linux/amd64,linux/arm64
@@ -36,7 +36,7 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./docker-part/backend
           file: ./docker-part/backend/Dockerfile.backend
           push: true
           platforms: linux/amd64,linux/arm64
@@ -45,7 +45,7 @@ jobs:
       - name: Build and push keycloak image
         uses: docker/build-push-action@v5
         with:
-          context: ./keycloak
+          context: ./docker-part/keycloak
           file: ./docker-part/keycloak/Dockerfile.keycloak
           push: true
           platforms: linux/amd64,linux/arm64
