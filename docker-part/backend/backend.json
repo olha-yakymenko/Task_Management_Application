@@ -1,0 +1,7 @@
+{
+  "realm": "task-realm",
+  "auth-server-url": "http://keycloak:8080/",
+  "ssl-required": "external",
+  "resource": "backend",
+  "confidential-port": 0
+}
