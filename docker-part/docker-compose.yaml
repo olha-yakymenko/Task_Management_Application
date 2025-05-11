@@ -22,45 +22,6 @@ services:
     secrets:
       - pg-password
 
-  # backend:
-  #   image: olhaya/backend:multiarch  
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile.backend
-  #     x-buildx: 
-  #       platforms: linux/amd64,linux/arm64
-  #       cache-from: type=registry,ref=olhaya/backend:cache
-  #       cache-to: type=registry,ref=olhaya/backend:cache,mode=max
-  #       tags: olhaya/backend:multiarch
-  #       push: true
-  #   depends_on:
-  #     - postgres
-  #   environment:
-  #     - PUBLIC_KEY_FILE=/run/secrets/jwt-private-key
-  #     - PGPASSWORD_FILE=/run/secrets/pg-password
-  #     - PGPORT
-  #     - PGUSER
-  #     - PGHOST
-  #     - PGDATABASE
-  #   ports:
-  #     - "3001:3001"
-  #   networks:
-  #     - db_network
-  #     - frontend_network
-  #   restart: always
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-  #     interval: 10s
-  #     retries: 5
-  #     timeout: 5s
-  #     start_period: 30s
-  #   secrets:
-  #     - pg-password
-  #     - jwt-private-key
-  #   configs:
-  #     - source: backend-config
-  #       target: /config/backend-config.env
-
   backend:
     image: olhaya/backend:multiarch  
     build:
@@ -99,9 +60,48 @@ services:
     configs:
       - source: backend-config
         target: /config/backend-config.env
-    # Wolumen, który synchronizuje lokalny kod z kontenerem
-    volumes:
-      - ./backend:/app 
+#live reload
+  # backend:
+  #   image: olhaya/backend:multiarch  
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.backend
+  #     x-buildx: 
+  #       platforms: linux/amd64,linux/arm64
+  #       cache-from: type=registry,ref=olhaya/backend:cache
+  #       cache-to: type=registry,ref=olhaya/backend:cache,mode=max
+  #       tags: olhaya/backend:multiarch
+  #       push: true
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     - PUBLIC_KEY_FILE=/run/secrets/jwt-private-key
+  #     - PGPASSWORD_FILE=/run/secrets/pg-password
+  #     - PGPORT
+  #     - PGUSER
+  #     - PGHOST
+  #     - PGDATABASE
+  #   ports:
+  #     - "3001:3001"
+  #   networks:
+  #     - db_network
+  #     - frontend_network
+  #   restart: always
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+  #     interval: 10s
+  #     retries: 5
+  #     timeout: 5s
+  #     start_period: 30s
+  #   secrets:
+  #     - pg-password
+  #     - jwt-private-key
+  #   configs:
+  #     - source: backend-config
+  #       target: /config/backend-config.env
+  #   # Wolumen, który synchronizuje lokalny kod z kontenerem
+  #   volumes:
+  #     - ./backend:/app 
 
   keycloak:
     image: olhaya/keycloak:multiarch

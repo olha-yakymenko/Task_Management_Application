@@ -1,16 +1,79 @@
-FROM python:3.11-slim as builder
 
-WORKDIR /app
+# FROM python:3.11-slim
 
+
+# WORKDIR /app
+
+
+# COPY requirements.txt .
+
+
+# RUN pip install --no-cache-dir -r requirements.txt
+# RUN apt-get update && apt-get install -y curl
+
+
+# COPY . .
+
+
+# EXPOSE 3001
+
+# CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "3001"]
+
+
+
+# Definiowanie argumentów (ARG)
+ARG PYTHON_VERSION=3.11-slim
+ARG APP_DIR=/app
+
+# Etap 1: Budowanie zależności (Builder)
+FROM python:${PYTHON_VERSION} as builder
+
+# Ustawienie katalogu roboczego
+WORKDIR ${APP_DIR}
+
+# Skopiowanie pliku requirements.txt
 COPY requirements.txt .
+
+# Instalowanie zależności do katalogu /install, bez pamięci cache
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-FROM python:3.11-slim
+# Etap 2: Finalny obraz (aplikacja)
+FROM python:${PYTHON_VERSION}
 
-WORKDIR /app
+# Ustawienie katalogu roboczego
+WORKDIR ${APP_DIR}
+
+# Kopiowanie zainstalowanych zależności z etapu build
 COPY --from=builder /install /usr/local
+
+# Kopiowanie reszty aplikacji
 COPY . .
 
+# Ekspozycja portu, na którym działa aplikacja
 EXPOSE 3001
 
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "3001", "--reload"]
+# Uruchamianie aplikacji przy użyciu Uvicorn
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "3001"]
+
+
+
+
+
+
+
+# FROM python:3.11-slim as builder
+
+# WORKDIR /app
+
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# FROM python:3.11-slim
+
+# WORKDIR /app
+# COPY --from=builder /install /usr/local
+# COPY . .
+
+# EXPOSE 3001
+
+# CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "3001", "--reload"]

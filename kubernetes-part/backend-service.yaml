@@ -4,6 +4,9 @@ metadata:
   annotations:
     kompose.cmd: ./kompose convert -o ../kubernetes-part
     kompose.version: 1.31.2 (a92241f79)
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3001"
+    prometheus.io/path: "/metrics"
   creationTimestamp: null
   labels:
     io.kompose.service: backend
