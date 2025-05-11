@@ -6,7 +6,6 @@ services:
     image: postgres:16-alpine  
     environment:
       - POSTGRES_USER=admin
-      # - POSTGRES_PASSWORD=password
       - POSTGRES_PASSWORD_FILE=/run/secrets/pg-password
       - POSTGRES_DB=tasks
     volumes:
@@ -23,6 +22,45 @@ services:
     secrets:
       - pg-password
 
+  # backend:
+  #   image: olhaya/backend:multiarch  
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.backend
+  #     x-buildx: 
+  #       platforms: linux/amd64,linux/arm64
+  #       cache-from: type=registry,ref=olhaya/backend:cache
+  #       cache-to: type=registry,ref=olhaya/backend:cache,mode=max
+  #       tags: olhaya/backend:multiarch
+  #       push: true
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     - PUBLIC_KEY_FILE=/run/secrets/jwt-private-key
+  #     - PGPASSWORD_FILE=/run/secrets/pg-password
+  #     - PGPORT
+  #     - PGUSER
+  #     - PGHOST
+  #     - PGDATABASE
+  #   ports:
+  #     - "3001:3001"
+  #   networks:
+  #     - db_network
+  #     - frontend_network
+  #   restart: always
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+  #     interval: 10s
+  #     retries: 5
+  #     timeout: 5s
+  #     start_period: 30s
+  #   secrets:
+  #     - pg-password
+  #     - jwt-private-key
+  #   configs:
+  #     - source: backend-config
+  #       target: /config/backend-config.env
+
   backend:
     image: olhaya/backend:multiarch  
     build:
@@ -38,13 +76,7 @@ services:
       - postgres
     environment:
       - PUBLIC_KEY_FILE=/run/secrets/jwt-private-key
-      # - PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsP6fp3sm60pQMwBp6E7Ovb1aWLStcHRtU9YXq7qkdz/vt/Rh1Ff2hRy0xROkp+o43uxpBhJCEZKbT9QXlT544i2oT7pBQOffSbNnsdiNc+2Vr7EUB8UB+tOFgvgvNBNmsn6YKG2XmVQmw4B6x1T+ThMEPyn6JkUj1Ym6JYj6mimthhpyJeAGa1/dfRQrUC7d/gCJLKbW+grVE+UiYceATWxE2O0dsJPvxtxJiarS2CRXBTRU3dveu0u1zEQKVSxWtug0kIJjzmgBLJp8NtZKGkm0DDwIMEtFrrEWvPi+9IPCmgo+U+wCo9OhyBgIQ5j+Wm1qTlRFBMJx46F/xQzXWwIDAQAB
-      # - PGUSER=admin
-      # - PGHOST=postgres
-      # - PGDATABASE=tasks
-      # - PGPASSWORD=password
       - PGPASSWORD_FILE=/run/secrets/pg-password
-      # - PGPORT=5432
       - PGPORT
       - PGUSER
       - PGHOST
@@ -67,6 +99,9 @@ services:
     configs:
       - source: backend-config
         target: /config/backend-config.env
+    # Wolumen, który synchronizuje lokalny kod z kontenerem
+    volumes:
+      - ./backend:/app 
 
   keycloak:
     image: olhaya/keycloak:multiarch

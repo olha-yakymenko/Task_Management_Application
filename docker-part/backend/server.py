@@ -363,3 +363,4 @@ async def get_employees(token: dict = Depends(verify_token)):
 @app.get("/health")
 def health():
     return {"status": "OK"}
+

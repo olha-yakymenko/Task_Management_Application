@@ -1,43 +1,16 @@
-# FROM node:16-alpine
-
-# WORKDIR /app
-# COPY package*.json ./
-# RUN npm install --production
-# COPY ./server.js .
-# COPY ./backend.json .
-# EXPOSE 3001
-# CMD ["node", "server.js"]
-
-
-FROM python:3.11-slim
-
-# Ustawienie katalogu roboczego
+FROM python:3.11-slim as builder
 
 WORKDIR /app
 
-# Kopiowanie pliku zależności
-
 COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# Instalacja zależności (tylko wymagane biblioteki)
+FROM python:3.11-slim
 
-RUN pip install --no-cache-dir -r requirements.txt
-RUN apt-get update && apt-get install -y curl
-
-# Skopiowanie całego projektu
-
+WORKDIR /app
+COPY --from=builder /install /usr/local
 COPY . .
-
-# Wystawienie portu (zmień na ten, którego używasz w aplikacji)
 
 EXPOSE 3001
 
-# Komenda do uruchomienia serwera — dostosuj do frameworka:
-
-# Dla Flask:
-
-# CMD \["python", "main.py"]
-
-# Dla FastAPI (Uvicorn):
-
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "3001"]
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "3001", "--reload"]
