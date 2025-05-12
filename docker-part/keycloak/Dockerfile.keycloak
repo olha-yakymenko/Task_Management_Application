@@ -18,3 +18,7 @@ ENV KC_ADMIN=admin
 ENV KC_ADMIN_PASSWORD=admin
 
 CMD ["start", "--import-realm"]
+
+
+
+
