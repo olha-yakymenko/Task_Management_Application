@@ -1,0 +1,18 @@
+apiVersion: v1
+data:
+  frontend-config.env: |2
+     # frontend-config.env
+
+    # Adres backendu, z którym frontend będzie się komunikował
+    REACT_APP_BACKEND_URL=http://backend:3001
+
+    # Adres Keycloak do autentykacji
+    REACT_APP_KEYCLOAK_URL=http://keycloak:8080
+
+    # Można dodać inne zmienne, które frontend będzie używał
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: frontend
+  name: frontend-config

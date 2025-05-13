@@ -1,0 +1,33 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   annotations:
+#     kompose.cmd: ./kompose convert -o kuber2
+#     kompose.version: 1.31.2 (a92241f79)
+#   creationTimestamp: null
+#   labels:
+#     io.kompose.service: frontend
+#   name: frontend
+# spec:
+#   ports:
+#     - name: "3000"
+#       port: 3000
+#       targetPort: 3000
+#   selector:
+#     io.kompose.service: frontend
+# status:
+#   loadBalancer: {}
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend  # Zgodnie z labelami z Deployment
+  ports:
+    - protocol: TCP
+      port: 80  # Port na którym będzie dostępny frontend w Kubernetesie
+      targetPort: 3000  # Port aplikacji w kontenerze
