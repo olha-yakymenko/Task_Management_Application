@@ -23,3 +23,11 @@ spec:
             name: backend   
             port:
               number: 3001  
+      - path: /api-ex          
+        pathType: Prefix
+        backend:
+          service:
+            name: express-backend   
+            port:
+              number: 3002
+        

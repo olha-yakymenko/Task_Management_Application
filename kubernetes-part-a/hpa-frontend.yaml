@@ -1,0 +1,19 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend
+  namespace: default  # Możesz zmienić na odpowiednią przestrzeń nazw
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend  # Nazwa deploymentu
+  minReplicas: 1  # Minimalna liczba replik
+  maxReplicas: 5  # Maksymalna liczba replik
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50  # Dostosowanie w zależności od zużycia CPU (50%)
