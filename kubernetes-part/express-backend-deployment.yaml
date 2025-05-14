@@ -2,21 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: ./kompose convert -o ../kubernetes-part
+    kompose.cmd: ./kompose convert -o test
     kompose.version: 1.31.2 (a92241f79)
   creationTimestamp: null
   labels:
     io.kompose.service: express-backend
   name: express-backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       io.kompose.service: express-backend
+  strategy: {}
   template:
     metadata:
       annotations:
-        kompose.cmd: ./kompose convert -o ../kubernetes-part
+        kompose.cmd: ./kompose convert -o test
         kompose.version: 1.31.2 (a92241f79)
       creationTimestamp: null
       labels:
@@ -30,6 +31,7 @@ spec:
               value: /run/secrets/pg-password/pg-password
             - name: PUBLIC_KEY_FILE
               value: /run/secrets/jwt-private-key/jwt-private-key
+          image: olhaya/backend:multiarch
           image: olhaya/express-backend:multiarch
           livenessProbe:
             exec:
@@ -46,17 +48,11 @@ spec:
             - containerPort: 3002
               hostPort: 3002
               protocol: TCP
-          resources:
-            requests:
-              cpu: "100m"       # 100 miliCPU (0.1 CPU)
-              memory: "200Mi"    # 200 MiB pamięci
-            limits:
-              cpu: "500m"       # 500 miliCPU (0.5 CPU)
-              memory: "1Gi"
+          resources: {}
           volumeMounts:
-            - mountPath: /config/backend-config.env
-              name: backend-config
-              subPath: backend-config.env
+            - mountPath: /config/ex-backend-config.env
+              name: express-backend-config
+              subPath: ex-backend-config.env
             - mountPath: /run/secrets/pg-password
               name: pg-password
             - mountPath: /run/secrets/jwt-private-key
@@ -65,10 +61,10 @@ spec:
       volumes:
         - configMap:
             items:
-              - key: backend-config.env
-                path: backend-config.env
-            name: backend-config
-          name: backend-config
+              - key: ex-backend-config.env
+                path: ex-backend-config.env
+            name: express-backend-config
+          name: express-backend-config
         - name: pg-password
           secret:
             items:
@@ -81,3 +77,4 @@ spec:
               - key: jwt-private-key
                 path: jwt-private-key
             secretName: jwt-private-key
+status: {}
