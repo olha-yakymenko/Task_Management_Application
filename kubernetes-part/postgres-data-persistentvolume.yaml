@@ -14,5 +14,5 @@ spec:
   hostPath:
     path: /mnt/data/postgres  
   claimRef:
-    namespace: default         
+    namespace: tasks         
     name: postgres-data

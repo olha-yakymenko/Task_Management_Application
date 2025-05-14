@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: tasks   
   annotations:
     kompose.cmd: kompose convert -f docker-compose.yaml
     kompose.version: 1.34.0 (HEAD)
@@ -48,6 +49,7 @@ spec:
               command:
                 - /opt/keycloak/bin/kc.sh
                 - show-config
+                - optimized
             failureThreshold: 5
             initialDelaySeconds: 30
             periodSeconds: 10
