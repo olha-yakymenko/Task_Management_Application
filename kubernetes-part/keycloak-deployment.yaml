@@ -58,7 +58,7 @@ spec:
               hostPort: 8080
               protocol: TCP
           volumeMounts:
-            - mountPath: /opt/keycloak/data
+            - mountPath: /opt/keycloak/external-data
               name: keycloak-data
           resources:
             requests:
@@ -72,6 +72,5 @@ spec:
         - name: keycloak-data
           persistentVolumeClaim:
             claimName: keycloak-data
-status: {}
 
 

@@ -13,7 +13,6 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: backend
-  strategy: {}
   template:
     metadata:
       annotations:
@@ -47,7 +46,13 @@ spec:
             - containerPort: 3001
               hostPort: 3001
               protocol: TCP
-          resources: {}
+          resources:
+            requests:
+              cpu: "100m"       # 100 miliCPU (0.1 CPU)
+              memory: "200Mi"    # 200 MiB pamięci
+            limits:
+              cpu: "500m"       # 500 miliCPU (0.5 CPU)
+              memory: "1Gi"
           volumeMounts:
             - mountPath: /config/backend-config.env
               name: backend-config
@@ -76,4 +81,3 @@ spec:
               - key: jwt-private-key
                 path: jwt-private-key
             secretName: jwt-private-key
-status: {}

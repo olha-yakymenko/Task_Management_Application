@@ -255,94 +255,96 @@ async def get_all_tasks_with_status(
     finally:
         await conn.close()
 
-@app.put("/api/task")
-async def update_task_status(
-    update: TaskStatusUpdate,
-    token: dict = Depends(verify_token)
-):
-    """Użytkownik może zaktualizować swój status zadania"""
-    conn = await get_db()
-    try:
-        assigned = await conn.fetchrow(
-            """SELECT 1 FROM tasks t 
-               WHERE t.id = $1 AND $2 = ANY(t.employees)""",
-            update.task_id,
-            token["preferred_username"]
-        )
+# @app.put("/api/task")
+# async def update_task_status(
+#     update: TaskStatusUpdate,
+#     token: dict = Depends(verify_token)
+# ):
+#     """Użytkownik może zaktualizować swój status zadania"""
+#     conn = await get_db()
+#     try:
+#         assigned = await conn.fetchrow(
+#             """SELECT 1 FROM tasks t 
+#                WHERE t.id = $1 AND $2 = ANY(t.employees)""",
+#             update.task_id,
+#             token["preferred_username"]
+#         )
         
-        if not assigned:
-            raise HTTPException(status_code=403, detail="Not authorized to update this task")
+#         if not assigned:
+#             raise HTTPException(status_code=403, detail="Not authorized to update this task")
 
-        await conn.execute(
-            """UPDATE task_status 
-               SET completed = $1 
-               WHERE task_id = $2 AND username = $3""",
-            update.completed,
-            update.task_id,
-            token["preferred_username"]
-        )
+#         await conn.execute(
+#             """UPDATE task_status 
+#                SET completed = $1 
+#                WHERE task_id = $2 AND username = $3""",
+#             update.completed,
+#             update.task_id,
+#             token["preferred_username"]
+#         )
         
-        return {"message": "Task status updated successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        await conn.close()
+#         return {"message": "Task status updated successfully"}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+#     finally:
+#         await conn.close()
 
-@app.get("/api/my-tasks")
-async def get_my_tasks(
-    token: dict = Depends(verify_token)
-):
-    """Pobierz zadania przypisane do bieżącego użytkownika"""
-    conn = await get_db()
-    try:
-        tasks = await conn.fetch(
-            """SELECT t.*, ts.completed 
-               FROM tasks t
-               JOIN task_status ts ON t.id = ts.task_id
-               WHERE ts.username = $1""",
-            token["preferred_username"]
-        )
+# @app.get("/api/my-tasks")
+# async def get_my_tasks(
+#     token: dict = Depends(verify_token)
+# ):
+#     """Pobierz zadania przypisane do bieżącego użytkownika"""
+#     conn = await get_db()
+#     try:
+#         tasks = await conn.fetch(
+#             """SELECT t.*, ts.completed 
+#                FROM tasks t
+#                JOIN task_status ts ON t.id = ts.task_id
+#                WHERE ts.username = $1""",
+#             token["preferred_username"]
+#         )
         
-        return {"tasks": [dict(t) for t in tasks]}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        await conn.close()
+#         return {"tasks": [dict(t) for t in tasks]}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+#     finally:
+#         await conn.close()
 
-@app.get("/api/task")
-async def get_user_tasks(token: dict = Depends(verify_token)):
-    conn = await get_db()
-    try:
-        tasks = await conn.fetch("""
-            SELECT 
-                t.id,
-                t.title,
-                t.date,
-                t.username,
-                ts.completed
-            FROM tasks t
-            JOIN task_status ts ON t.id = ts.task_id
-            WHERE ts.username = $1
-            ORDER BY t.date DESC
-        """, token["preferred_username"])
 
-        return {
-            "tasks": [
-                {
-                    "id": task["id"],
-                    "title": task["title"],
-                    "date": task["date"],
-                    "admin": task["username"],
-                    "completed": task["completed"]
-                }
-                for task in tasks
-            ]
-        }
-    except Exception as e:
-        logger.error(f"Error fetching tasks: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-    finally:
-        await conn.close()
+
+# @app.get("/api/task")
+# async def get_user_tasks(token: dict = Depends(verify_token)):
+#     conn = await get_db()
+#     try:
+#         tasks = await conn.fetch("""
+#             SELECT 
+#                 t.id,
+#                 t.title,
+#                 t.date,
+#                 t.username,
+#                 ts.completed
+#             FROM tasks t
+#             JOIN task_status ts ON t.id = ts.task_id
+#             WHERE ts.username = $1
+#             ORDER BY t.date DESC
+#         """, token["preferred_username"])
+
+#         return {
+#             "tasks": [
+#                 {
+#                     "id": task["id"],
+#                     "title": task["title"],
+#                     "date": task["date"],
+#                     "admin": task["username"],
+#                     "completed": task["completed"]
+#                 }
+#                 for task in tasks
+#             ]
+#         }
+#     except Exception as e:
+#         logger.error(f"Error fetching tasks: {str(e)}")
+#         raise HTTPException(status_code=500, detail="Internal server error")
+#     finally:
+#         await conn.close()
 
 @app.get("/api/employees")
 async def get_employees(token: dict = Depends(verify_token)):

@@ -34,7 +34,7 @@ const ToDoItems = () => {
   const fetchTasks = async (authToken) => {
     try {
       // const assignedResponse = await fetch("http://localhost:3001/api/task", {
-        const assignedResponse = await fetch("/api/task", {
+        const assignedResponse = await fetch("/api-ex/task", {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -114,7 +114,7 @@ const ToDoItems = () => {
   const handleCompleteTask = async (taskId, completed) => {
     try {
       // const response = await fetch("http://localhost:3001/api/task", {
-        const response = await fetch("/api/task", {
+        const response = await fetch("/api-ex/task", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

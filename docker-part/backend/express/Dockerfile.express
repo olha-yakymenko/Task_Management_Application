@@ -1,0 +1,17 @@
+# Etap bazowy
+FROM node:20-alpine
+
+# Ustawienie katalogu roboczego
+WORKDIR /app
+
+# Kopiuj pliki
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Ustaw zmienne środowiskowe
+ENV NODE_ENV=production
+
+# Uruchom serwer
+CMD ["npm", "start"]

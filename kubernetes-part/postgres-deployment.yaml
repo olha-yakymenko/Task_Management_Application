@@ -55,7 +55,13 @@ spec:
             - containerPort: 5432
               hostPort: 5432
               protocol: TCP
-          resources: {}
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           volumeMounts:
             - mountPath: /run/secrets/pg-password
               name: pg-password
@@ -72,4 +78,3 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-data
-status: {}

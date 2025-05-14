@@ -4,8 +4,6 @@ metadata:
   annotations:
     kompose.cmd: ./kompose convert -o kuber2
     kompose.version: 1.31.2 (a92241f79)
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "9187"
   creationTimestamp: null
   labels:
     io.kompose.service: postgres
@@ -17,5 +15,3 @@ spec:
       targetPort: 5432
   selector:
     io.kompose.service: postgres
-status:
-  loadBalancer: {}
