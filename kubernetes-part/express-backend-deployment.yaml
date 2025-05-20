@@ -10,7 +10,7 @@ metadata:
     io.kompose.service: express-backend
   name: express-backend
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       io.kompose.service: express-backend
@@ -47,7 +47,7 @@ spec:
           name: express-backend
           ports:
             - containerPort: 3002
-              hostPort: 3002
+              # hostPort: 3002
               protocol: TCP
           resources: {}
           volumeMounts:

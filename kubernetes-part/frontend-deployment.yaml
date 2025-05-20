@@ -10,7 +10,7 @@ metadata:
     io.kompose.service: frontend
   name: frontend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       io.kompose.service: frontend
@@ -26,7 +26,7 @@ spec:
         io.kompose.service: frontend
     spec:
       containers:
-        - image: olhaya/frontend:multiarch
+        - image: olhaya/frontend:multiarch1
           livenessProbe:
             exec:
               command:
@@ -40,7 +40,7 @@ spec:
           name: frontend
           ports:
             - containerPort: 3000
-              hostPort: 3000
+              # hostPort: 3000
               protocol: TCP
           resources:
             requests:

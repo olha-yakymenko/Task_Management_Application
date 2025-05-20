@@ -80,14 +80,6 @@ services:
     environment:
       - PUBLIC_KEY_FILE=/run/secrets/jwt-private-key
       - PGPASSWORD_FILE=/run/secrets/pg-password
-      # - PGPORT
-      # - PGUSER
-      # - PGHOST
-      # - PGDATABASE
-      # - PGUSER=${PGUSER}
-      # - PGPASSWORD=${PGPASSWORD}
-      # - PGHOST=${PGHOST}
-      # - PGDATABASE=${PGDATABASE}
     ports:
       - "3002:3002"
     networks:
@@ -172,6 +164,9 @@ services:
       # - KC_DB_PASSWORD_FILE=/run/secrets/pg-password
       - KC_HOSTNAME=localhost
       - KC_HTTP_ENABLED=true
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+
     ports:
       - "8080:8080"
     depends_on:
@@ -188,7 +183,7 @@ services:
       start_period: 30s
     volumes:
       - keycloak-data:/opt/keycloak/data
-    command: ["start", "--import-realm"]
+    command: ["start-dev", "--import-realm"]
 
 
   frontend:

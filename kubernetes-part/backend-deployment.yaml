@@ -31,7 +31,7 @@ spec:
               value: /run/secrets/pg-password/pg-password
             - name: PUBLIC_KEY_FILE
               value: /run/secrets/jwt-private-key/jwt-private-key
-          image: olhaya/backend:multiarch
+          image: olhaya/backend:multiarch1
           livenessProbe:
             exec:
               command:
@@ -45,7 +45,7 @@ spec:
           name: backend
           ports:
             - containerPort: 3001
-              hostPort: 3001
+              # hostPort: 3001
               protocol: TCP
           resources:
             requests:
