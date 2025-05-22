@@ -51,3 +51,16 @@ d) Uruchomienie aplikacji w Kubernetes
 Proszę wykonać polecenie, aby zaaplikować konfiguracje z plików YAML w katalogu kubernetes-part:
 kubectl apply -f .
 Proszę poczekać, aż wszystkie zasoby zostaną uruchomione. Czas oczekiwania zależy od zasobów systemowych i prędkości komputera.
+
+
+
+
+
+
+# Zmieniamy tag lokalnie
+docker tag olhaya/backend:multiarch olhaya/backend:multiarch1
+docker tag olhaya/keycloak:multiarch olhaya/keycloak:multiarch1
+
+# Wysyłamy nowy tag do rejestru (np. Docker Hub)
+docker push olhaya/backend:multiarch1
+docker push olhaya/keycloak:multiarch1

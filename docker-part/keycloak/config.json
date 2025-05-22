@@ -498,6 +498,30 @@
       },
       "notBefore": 0,
       "groups": []
+    },
+    {
+      "id" : "6c4040e9-e847-4d95-a951-e756513997f3",
+      "username" : "user",
+      "firstName" : "user",
+      "lastName" : "user",
+      "email" : "user@user",
+      "emailVerified" : false,
+      "createdTimestamp" : 1746217330666,
+      "enabled" : true,
+      "totp" : false,
+      "credentials" : [ {
+        "id" : "b91442dd-ff3e-48b9-a170-9379185cb94c",
+        "type" : "password",
+        "userLabel" : "My password",
+        "createdDate" : 1746217340143,
+        "secretData" : "{\"value\":\"PARHNR7bnkKdaeP3rpKZafPivN3EOL2WsKk7yv2e7Do=\",\"salt\":\"mDESSakHO6yxG15kB93y2Q==\",\"additionalParameters\":{}}",
+        "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+      } ],
+      "disableableCredentialTypes" : [ ],
+      "requiredActions" : [ ],
+      "realmRoles" : [ "default-roles-task-realm", "admin" ],
+      "notBefore" : 0,
+      "groups" : [ ]
     }
   ],
   "scopeMappings": [

@@ -717,6 +717,8 @@ logging.basicConfig(level=logging.INFO)
 #         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 logger = logging.getLogger(__name__)
+introspection_cache = {}
+
 def verify_token(authorization: Optional[str] = Header(None)) -> dict:
     logger.info("=== START TOKEN VERIFICATION ===")
 
@@ -772,6 +774,7 @@ def verify_token(authorization: Optional[str] = Header(None)) -> dict:
 
 # Admin check
 def check_admin(decoded_token: dict):
+    print("token", decoded_token)
     roles = decoded_token.get("realm_access", {}).get("roles", [])
     if "admin" not in roles:
         raise HTTPException(status_code=403, detail="Admin role required")
@@ -1050,3 +1053,5 @@ async def get_summary(token: dict = Depends(verify_token)):
 @app.get("/health")
 def health():
     return {"status": "OK"}
+
+

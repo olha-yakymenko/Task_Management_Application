@@ -25,7 +25,7 @@ services:
 
 
   backend:
-    image: olhaya/backend:multiarch  
+    image: olhaya/backend:multiarch1 
     build:
       context: ./backend/python
       dockerfile: Dockerfile.backend
@@ -33,7 +33,7 @@ services:
         platforms: linux/amd64,linux/arm64
         cache-from: type=registry,ref=olhaya/backend:cache
         cache-to: type=registry,ref=olhaya/backend:cache,mode=max
-        tags: olhaya/backend:multiarch
+        tags: olhaya/backend:multiarch1
         push: true
     depends_on:
       - postgres
@@ -143,7 +143,7 @@ services:
   #     - ./backend:/app 
 
   keycloak:
-    image: olhaya/keycloak:multiarch
+    image: olhaya/keycloak:multiarch1
     build:
       context: ./keycloak
       dockerfile: Dockerfile.keycloak
@@ -151,7 +151,7 @@ services:
         platforms: linux/amd64,linux/arm64
         cache-from: type=registry,ref=olhaya/keycloak:cache
         cache-to: type=registry,ref=olhaya/keycloak:cache,mode=max
-        tags: olhaya/keycloak:multiarch
+        tags: olhaya/keycloak:multiarch1
         push: true
     environment:
       - KC_ADMIN=admin
@@ -183,7 +183,7 @@ services:
       start_period: 30s
     volumes:
       - keycloak-data:/opt/keycloak/data
-    command: ["start-dev", "--import-realm"]
+    command: ["start", "--import-realm"]
 
 
   frontend:

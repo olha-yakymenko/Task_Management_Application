@@ -21,27 +21,45 @@ spec:
         io.kompose.service: keycloak
     spec:
       containers:
+        # - env:
+        #     - name: KC_ADMIN
+        #       value: admin
+        #     - name: KC_DB
+        #       value: postgres
+        #     - name: KC_DB_PASSWORD
+        #       value: password
+        #     - name: KC_ADMIN_PASSWORD_FILE
+        #       value: /run/secrets/kc-admin-password/password
+        #     - name: KC_DB_URL
+        #       value: jdbc:postgresql://postgres:5432/tasks
+        #     - name: KC_DB_USERNAME
+        #       value: admin
+        #     - name: KC_HOSTNAME
+        #       value: localhost
+        #     - name: KC_HTTP_ENABLED
+        #       value: "true"
+        #     # - name: KEYCLOAK_ADMIN
+        #     #   value: admin
+        #     # - name: KC_ADMIN_PASSWORD_FILE
+        #     #   value: /run/secrets/kc-admin-password/password
         - env:
-            - name: KC_ADMIN
-              value: admin
-            - name: KC_DB
-              value: postgres
-            - name: KC_DB_PASSWORD
-              value: password
-            - name: KC_ADMIN_PASSWORD_FILE
-              value: /run/secrets/kc-admin-password/password
-            - name: KC_DB_URL
-              value: jdbc:postgresql://postgres:5432/tasks
-            - name: KC_DB_USERNAME
-              value: admin
-            - name: KC_HOSTNAME
-              value: localhost
-            - name: KC_HTTP_ENABLED
-              value: "true"
-            - name: KEYCLOAK_ADMIN
-              value: admin
-            - name: KC_ADMIN_PASSWORD_FILE
-              value: /run/secrets/kc-admin-password/password
+          - name: KEYCLOAK_ADMIN
+            value: admin
+          - name: KEYCLOAK_ADMIN_PASSWORD_FILE
+            value: /run/secrets/kc-admin-password/password
+          - name: KC_DB
+            value: postgres
+          - name: KC_DB_PASSWORD
+            value: password
+          - name: KC_DB_URL
+            value: jdbc:postgresql://postgres:5432/tasks
+          - name: KC_DB_USERNAME
+            value: admin
+          - name: KC_HOSTNAME
+            value: localhost
+          - name: KC_HTTP_ENABLED
+            value: "true"
+
           image: olhaya/keycloak:multiarch1
           # livenessProbe:
           #   exec:
@@ -54,6 +72,12 @@ spec:
             # periodSeconds: 10
             # timeoutSeconds: 5
           name: keycloak
+          # command: ["/opt/keycloak/bin/kc.sh"]
+          # args: ["start", "--import-realm", "--optimized"]
+          command: ["/bin/sh", "-c"]
+          args:
+            - /opt/keycloak/bin/kc.sh build && /opt/keycloak/bin/kc.sh start --import-realm --optimized
+
           ports:
             - containerPort: 8080
               hostPort: 8080

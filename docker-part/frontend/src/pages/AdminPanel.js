@@ -18,7 +18,7 @@ const TaskCreationForm = () => {
     if (keycloak.authenticated) {
       axios
         // .get("http://localhost:3001/api/employees", {
-        .get(" /api/employees", {
+        .get("/api/employees", {
           headers: {
             Authorization: `Bearer ${keycloak.token}`,
           },
