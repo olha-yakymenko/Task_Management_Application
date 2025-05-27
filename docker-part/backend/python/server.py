@@ -734,16 +734,16 @@ def verify_token(authorization: Optional[str] = Header(None)) -> dict:
     logger.info("Token extracted")
 
     # Endpoint introspekcji Keycloak
-    # keycloak_url = os.getenv("KEYCLOAK_URL")
-    # realm = os.getenv("KEYCLOAK_REALM")
-    # client_id = os.getenv("KEYCLOAK_CLIENT_ID")
-    # client_secret = os.getenv("KEYCLOAK_CLIENT_SECRET")
+    keycloak_url = os.getenv("keycloak_url")
+    realm = os.getenv("realm")
+    client_id = os.getenv("client_id")
+    client_secret = os.getenv("client_secret")
 
 
-    keycloak_url = "http://keycloak:8080"
-    realm = "task-realm"
-    client_id = "backend"
-    client_secret = "**********"
+    # keycloak_url = "http://keycloak:8080"
+    # realm = "task-realm"
+    # client_id = "backend"
+    # client_secret = "**********"
 
 
     if not all([keycloak_url, realm, client_id, client_secret]):
@@ -995,25 +995,93 @@ async def get_employees(token: dict = Depends(verify_token)):
 
     return {"employees": [dict(e) for e in employees]}
 
+# @app.get("/api/summary")
+# async def get_summary(token: dict = Depends(verify_token)):
+#     print("doctalem summary")
+#     conn = await get_db()
+#     try:
+#         print("TOKa", token)
+#         # roles = token.get("realm_access", {}).get("roles", [])
+#         username = token["preferred_username"]
+
+#         print("sss", username)
+
+#         if check_admin(token):
+#             print("admina")
+#             # Dla admina: statystyki globalne
+#             total_tasks = await conn.fetchval("SELECT COUNT(*) FROM tasks")
+#             total_statuses = await conn.fetch("SELECT completed FROM task_status")
+
+#             completed = sum(1 for row in total_statuses if row["completed"])
+#             pending = len(total_statuses) - completed
+#             unique_employees = await conn.fetchval("""
+#                 SELECT COUNT(DISTINCT unnest(employees)) FROM tasks
+#             """)
+
+#             print({
+#                 "total_tasks": total_tasks,
+#                 "total_employees": unique_employees,
+#                 "completed_statuses": completed,
+#                 "pending_statuses": pending
+#             })
+
+#             return {
+#                 "total_tasks": total_tasks,
+#                 "total_employees": unique_employees,
+#                 "completed_statuses": completed,
+#                 "pending_statuses": pending
+#             }
+#         else:
+#             print("Jestem")
+#             # Dla pracownika: jego statystyki
+#             assigned = await conn.fetch(
+#                 "SELECT completed FROM task_status WHERE username = $1",
+#                 username
+#             )
+#             print('assigned')
+#             total = len(assigned)
+#             completed = sum(1 for row in assigned if row["completed"])
+#             pending = total - completed
+#             rate = round((completed / total) * 100, 2) if total > 0 else 0
+
+#             return {
+#                 "assigned_tasks": total,
+#                 "completed": completed,
+#                 "pending": pending,
+#                 "completion_rate": rate
+#             }
+
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+#     finally:
+#         await conn.close()
+
+
 @app.get("/api/summary")
 async def get_summary(token: dict = Depends(verify_token)):
     print("doctalem summary")
-    conn = await get_db()
+    conn = None
     try:
-        roles = token.get("realm_access", {}).get("roles", [])
+        conn = await get_db()
+        print("TOKa", token)
         username = token["preferred_username"]
+        print("sss", username)
 
-        if check_admin(token):
-            # Dla admina: statystyki globalne
+        try:
+            # Sprawdzenie, czy admin — jeśli tak, lecimy w admina
+            check_admin(token)
+            print("admina")
             total_tasks = await conn.fetchval("SELECT COUNT(*) FROM tasks")
             total_statuses = await conn.fetch("SELECT completed FROM task_status")
 
-            completed = sum(1 for row in total_statuses if row["completed"])
+            completed = sum(1 for row in total_statuses if row["completed"] is True)
             pending = len(total_statuses) - completed
             unique_employees = await conn.fetchval("""
-                SELECT COUNT(DISTINCT unnest(employees)) FROM tasks
+                SELECT COUNT(DISTINCT e)
+                FROM tasks, unnest(employees) AS e
             """)
 
+            print("Zaraz zwracam dane:")
             print({
                 "total_tasks": total_tasks,
                 "total_employees": unique_employees,
@@ -1021,24 +1089,34 @@ async def get_summary(token: dict = Depends(verify_token)):
                 "pending_statuses": pending
             })
 
+
+
             return {
+                "type": "admin",
                 "total_tasks": total_tasks,
                 "total_employees": unique_employees,
                 "completed_statuses": completed,
                 "pending_statuses": pending
             }
-        else:
-            # Dla pracownika: jego statystyki
+
+        except HTTPException as e:
+            if e.status_code != 403:
+                raise e  # inny błąd, np. zły token → przerywamy
+
+            # Jeśli to 403, traktuj jako zwykłego użytkownika
+            print("Jestem użytkownikiem (nie adminem)")
             assigned = await conn.fetch(
                 "SELECT completed FROM task_status WHERE username = $1",
                 username
             )
+            print("assigned:", assigned)
             total = len(assigned)
-            completed = sum(1 for row in assigned if row["completed"])
+            completed = sum(1 for row in assigned if row["completed"] is True)
             pending = total - completed
             rate = round((completed / total) * 100, 2) if total > 0 else 0
 
             return {
+                "type": "user",
                 "assigned_tasks": total,
                 "completed": completed,
                 "pending": pending,
@@ -1046,9 +1124,12 @@ async def get_summary(token: dict = Depends(verify_token)):
             }
 
     except Exception as e:
+        print("Błąd:", e)
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        await conn.close()
+        if conn:
+            await conn.close()
+
 
 @app.get("/health")
 def health():

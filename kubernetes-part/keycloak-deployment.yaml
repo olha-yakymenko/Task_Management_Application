@@ -74,9 +74,13 @@ spec:
           name: keycloak
           # command: ["/opt/keycloak/bin/kc.sh"]
           # args: ["start", "--import-realm", "--optimized"]
+
+          # dzialalo
           command: ["/bin/sh", "-c"]
           args:
             - /opt/keycloak/bin/kc.sh build && /opt/keycloak/bin/kc.sh start --import-realm --optimized
+
+
 
           ports:
             - containerPort: 8080

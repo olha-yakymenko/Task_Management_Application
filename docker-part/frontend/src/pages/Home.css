@@ -76,3 +76,42 @@
     margin-top: 1rem;
   }
   
+
+
+
+
+  .btn-request-admin {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .admin-requests {
+    margin-top: 30px;
+  }
+  
+  .requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .requests-table th,
+  .requests-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .requests-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .requests-table td button {
+    margin-right: 8px;
+    padding: 4px 10px;
+  }
+  
