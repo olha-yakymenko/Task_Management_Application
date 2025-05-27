@@ -7,7 +7,6 @@ const TaskItem = ({ task, currentUsername, onComplete, onDelete }) => {
       <h3>{task.title}</h3>
       <p><strong>Due:</strong> {task.date}</p>
       <p><strong>Completed:</strong> {task.completed ? "Yes" : "No"}</p>
-      {/* <p><strong>Employees:</strong> {task.employees.join(", ")}</p> */}
       <p><strong>Created by (admin):</strong> {task.admin}</p>
 
       {currentUsername === task.admin && (
