@@ -9,6 +9,7 @@ Aby uruchomić aplikację w środowisku Docker, proszę wykonać poniższe kroki
 a) Pobranie kodu źródłowego
 git clone https://github.com/olha-yakymenko/technologie_chmurowe_projekt.git
 cd docker-part
+
 b) Uruchomienie aplikacji za pomocą Docker
 Aby uruchomić aplikację, należy wydać polecenie:
 

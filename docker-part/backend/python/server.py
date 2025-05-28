@@ -141,7 +141,6 @@ logging.basicConfig(level=logging.INFO)
 #         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 logger = logging.getLogger(__name__)
-introspection_cache = {}
 
 def verify_token(authorization: Optional[str] = Header(None)) -> dict:
     logger.info("=== START TOKEN VERIFICATION ===")

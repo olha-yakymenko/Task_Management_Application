@@ -12,7 +12,7 @@ import UserPanel from "./pages/UserPanel";
 function App() {
   return (
     <div>
-      <ReactKeycloakProvider authClient={keycloak}>
+      <ReactKeycloakProvider authClient={keycloak} >
         <Nav />
         <BrowserRouter>
           <Routes>
