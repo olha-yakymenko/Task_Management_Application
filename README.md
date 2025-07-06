@@ -45,7 +45,7 @@ The application is designed with security in mind — all access is protected us
 
    ```bash
     git clone https://github.com/olha-yakymenko/technologie_chmurowe_projekt.git
-    cd kubernetes-part
+    cd kubernetes-part ```
 2. Ensure the following components are installed in your Kubernetes cluster:
 
 Ingress NGINX
@@ -59,16 +59,17 @@ Install missing components if necessary:
    ```bash
     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.6.1/components.yaml ```
-
+```
 3. Verify CoreDNS is running:
 
    ```bash
   kubectl get pods -n kube-system -l k8s-app=coredns   
-
+```
 4. Deploy the application manifests:
 
    ```bash
-  kubectl apply -f . 
+  kubectl apply -f .
+```
 Wait for all resources to start and stabilize.
 
 
