@@ -63,7 +63,7 @@ Install missing components if necessary:
 3. Verify CoreDNS is running:
 
    ```bash
-  kubectl get pods -n kube-system -l k8s-app=coredns   
+     kubectl get pods -n kube-system -l k8s-app=coredns   
 ```
 4. Deploy the application manifests:
 
@@ -72,7 +72,7 @@ Install missing components if necessary:
 ```
 Wait for all resources to start and stabilize.
 
-
+---
 Instrukcja uruchomienia projektu
 
 1. Uruchomienie części Docker
